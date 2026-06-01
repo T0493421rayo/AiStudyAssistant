@@ -1,8 +1,10 @@
 from pypdf import PdfReader
 
-reader = PdfReader(
-    "Summary Notes - Topic 6 Magnetism and Electromagnetism - Edexcel Physics IGCSE.pdf"
-)
+reader = PdfReader("magnetism.pdf")
+
+text = ""
 
 for page in reader.pages:
-    print(page.extract_text())
+    text += page.extract_text()
+
+print(text)
