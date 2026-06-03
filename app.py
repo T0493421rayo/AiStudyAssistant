@@ -48,7 +48,7 @@ def upload():
     )
 
     # designed to return result to browser
-    return f"<pre>{response.text}</pre>"
+    return render_template("results.html", questions=response.text)
 
 
 if __name__ == "__main__":

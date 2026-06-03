@@ -2,17 +2,30 @@
 <html>
 <head>
     <title>AI Study Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
 
-<h1>AI Study Assistant </h1>
+<div class="container">
 
-<p>Upload your PDF to generate quiz questions</p>
+    <h1>📚 AI Study Assistant</h1>
 
-<form action="/upload" method="post" enctype="multipart/form-data">
-    <input type="file" name="pdf">
-    <button type="submit">Generate Quiz</button>
-</form>
+    <div class="card">
+
+        <p>Upload your PDF notes to generate quiz questions instantly.</p>
+
+        <form action="/upload" method="POST" enctype="multipart/form-data">
+
+            <input type="file" name="pdf" required>
+
+            <button type="submit">Generate Quiz</button>
+
+        </form>
+
+    </div>
+
+</div>
 
 </body>
 </html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quiz Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🧠 Your Generated Quiz</h1>
+
+    <div class="card">
+        <div style="white-space: pre-wrap; text-align: left;">
+            {{ questions }}
+        </div>
+    </div>
+
+    <br>
+
+    <a href="/">⬅ Back to Upload</a>
+
+</div>
+
+</body>
+</html>
