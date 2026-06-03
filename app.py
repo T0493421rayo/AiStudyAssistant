@@ -62,7 +62,7 @@ def upload():
         - You MUST output exactly 10 questions
         - Number them from 1 to 10
         - Do NOT add extra text
-        - Do NOT stop early
+        -Do NOT stop early
 
         Format:
         1. Question
