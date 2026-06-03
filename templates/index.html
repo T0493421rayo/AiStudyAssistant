@@ -13,13 +13,19 @@
 
     <div class="card">
 
-        <p>Upload your PDF notes to generate quiz questions instantly.</p>
+        <p>Upload your PDF notes to generate quiz questions or flashcards instantly.</p>
 
         <form action="/upload" method="POST" enctype="multipart/form-data">
 
             <input type="file" name="pdf" required>
 
-            <button type="submit">Generate Quiz</button>
+            <button type="submit" name="action" value="quiz">
+                Generate Quiz
+            </button>
+
+            <button type="submit" name="action" value="flashcards">
+                Generate Flashcards
+            </button>
 
         </form>
 
