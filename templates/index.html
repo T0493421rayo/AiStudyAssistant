@@ -8,14 +8,10 @@
 <body>
 
 <div class="container">
-
-    <h1>📚 AI Study Assistant</h1>
-
+    <h1>AI Study Assistant</h1>
     <div class="card">
-
         <p>Upload your PDF notes to generate quiz questions or flashcards instantly.</p>
-
-        <form action="/upload" method="POST" enctype="multipart/form-data">
+        <form action="/upload" method="POST" enctype="multipart/form-data" onsubmit="showLoading()">
 
             <input type="file" name="pdf" required>
 
@@ -28,10 +24,17 @@
             </button>
 
         </form>
+        <div id="loading" style="display:none;">
+            <p>Generating study materials...</p>
+        </div>
 
     </div>
 
 </div>
-
+<script>
+function showLoading() {
+    document.getElementById("loading").style.display = "block";
+}
+</script>
 </body>
 </html>

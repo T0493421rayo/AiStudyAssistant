@@ -3,23 +3,31 @@ from pypdf import PdfReader
 from google import genai
 from dotenv import load_dotenv
 import os
+import time
+latest_result = ""
 
 app=Flask(__name__)
 load_dotenv()
 
-#PUT YOUR GEMINI API KEY HERE
 client = genai.Client(
     api_key=os.getenv("GEMINI_API_KEY")
 )
 
 
+from pypdf import PdfReader
+
+
 def extract_text(file):
-    reader = PdfReader(file)
-    text = ""
-    for page in reader.pages:
-        if page.extract_text():
-            text += page.extract_text()
-    return text
+    try:
+        reader = PdfReader(file)
+        text = ""
+        for page in reader.pages:
+            page_text = page.extract_text()
+            if page_text:
+                text += page_text
+        return text
+    except Exception:
+        return None
 
 
 @app.route("/")
@@ -32,21 +40,27 @@ def upload():
     file = request.files["pdf"]
     action = request.form.get("action")
 
-    # extract text from PDF
+    #extract text from PDF
     text = extract_text(file)
+    if text is None:
+        return render_template(
+            "results.html",
+            questions="Invalid or corrupted PDF.Please upload a valid PDF file."
+        )
 
-    # choose prompt based on button clicked
+
     if action == "flashcards":
         prompt = f"""
         You are a strict GCSE teacher.
 
-        Generate EXACTLY 10 flashcards from the notes below.
+        Create EXACTLY 10 flashcards from the notes.
 
-        Format:
-        Q: question
-        A: answer
+        Return in this format:
 
-        You MUST produce exactly 10 Q&A pairs.
+        Q: question here
+        A: answer here
+
+        Separate each flashcard with a blank line.
 
         Notes:
         {text}
@@ -74,11 +88,47 @@ def upload():
         {text}
         """
 
+    response = None
+
+    for attempt in range(3):
+        try:
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt
+            )
+            break
+
+        except Exception:
+            time.sleep(2)
+
+    if response is None:
+        return render_template(
+            "results.html",
+            questions="Gemini is currently busy.Please try again in a minute."
+        )
     response = client.models.generate_content(
         model="gemini-2.5-flash",
         contents=prompt
     )
 
+    global latest_result
+    latest_result = response.text
+
     return render_template("results.html", questions=response.text)
+from flask import Response
+@app.route("/download/txt")
+def download_txt():
+    global latest_result
+
+    if not latest_result:
+        return "No content to download yet."
+
+    return Response(
+        latest_result,
+        mimetype="text/plain",
+        headers={
+            "Content-Disposition": "attachment; filename=study-material.txt"
+        }
+    )
 if __name__ == "__main__":
     app.run(debug=True)

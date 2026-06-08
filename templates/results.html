@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Quiz Results</title>
+    <title>Results</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
@@ -9,17 +9,31 @@
 
 <div class="container">
 
-    <h1>🧠 Your Generated Quiz</h1>
+    <h1>Your Results</h1>
+    <a href="/download/txt">
+    <button>Download TXT version</button>
+    </a>
 
     <div class="card">
-        <div style="white-space: pre-wrap; text-align: left;">
-            {{ questions }}
+
+        <div class="flashcard-container">
+
+            {% set blocks = questions.split('\n\n') %}
+
+            {% for block in blocks %}
+                <div class="flashcard">
+                    <div class="flashcard-content">
+                        {{ block }}
+                </div>
+                </div>
+            {% endfor %}
+
         </div>
+
     </div>
 
     <br>
-
-    <a href="/">⬅ Back to Upload</a>
+    <a href="/">⬅ Back</a>
 
 </div>
 
