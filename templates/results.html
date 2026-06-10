@@ -4,33 +4,95 @@
     <title>Results</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
-
 <div class="container">
 
-    <h1>Your Results</h1>
-    <a href="/download/txt">
-    <button>Download TXT version</button>
-    </a>
+    <h1> Your Results</h1>
 
-    <div class="card">
+    <!-- DOWNLOAD BUTTONS -->
+    <div style="margin-bottom: 20px;">
+        <a href="/download/txt">
+            <button>Download TXT</button>
+        </a>
 
-        <div class="flashcard-container">
+        <a href="/download/pdf">
+            <button>Download PDF</button>
+        </a>
+    </div>
 
-            {% set blocks = questions.split('\n\n') %}
+    #Quiz mode
 
-            {% for block in blocks %}
-                <div class="flashcard">
-                    <div class="flashcard-content">
-                        {{ block }}
-                </div>
-                </div>
-            {% endfor %}
+{% if quiz %}
+
+<form action="/score" method="POST">
+
+{% for q in quiz %}
+
+<div class="flashcard">
+
+    <p>
+        <strong>Question {{ loop.index }}</strong>
+    </p>
+
+    <p>{{ q.question }}</p>
+
+    <input
+        type="text"
+        name="answer{{ loop.index }}"
+        placeholder="Type your answer"
+        required
+    >
+    <input
+        type="hidden"
+        name="question{{ loop.index }}"
+        value="{{ q.question }}"
+    >
+    <input
+        type="hidden"
+        name="correct{{ loop.index }}"
+        value="{{ q.answer }}"
+    >
+
+</div>
+
+{% endfor %}
+
+<br>
+
+<button type="submit">
+    Submit Quiz
+</button>
+
+</form>
+
+{% endif %}
+
+    <!-- ================= FLASHCARDS MODE ================= -->
+    {% if flashcards %}
+
+    <h2>🧠 Flashcards</h2>
+
+    <div class="flashcards">
+
+        {% for card in flashcards %}
+
+        <div class="flashcard" onclick="this.classList.toggle('flipped')">
+
+            <div class="front">
+                {{ card.q }}
+            </div>
+
+            <div class="back">
+                {{ card.a }}
+            </div>
 
         </div>
 
+        {% endfor %}
+
     </div>
+
+    {% endif %}
 
     <br>
     <a href="/">⬅ Back</a>

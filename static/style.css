@@ -1,3 +1,7 @@
+/* =======================
+   GLOBAL STYLES
+======================= */
+
 body {
     font-family: Arial, sans-serif;
     background: #f4f6f8;
@@ -5,105 +9,125 @@ body {
     padding: 0;
 }
 
-/* Page container */
+/* Main container */
 .container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100%;
     padding: 40px 20px;
     min-height: 100vh;
-    justify-content: flex-start;
 }
 
-/* Card */
-.card {
-    background: white;
-    padding: 25px;
-    border-radius: 12px;
-    width: 100%;
-    max-width: 600px;
+/* =======================
+   HEADINGS
+======================= */
 
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    box-sizing: border-box;
-    height: auto;
-    overflow: visible;
-}
-
-/* Title */
 h1 {
-    text-align: center;
     color: #333;
+    margin-bottom: 20px;
 }
 
-/* Form */
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
+/* =======================
+   BUTTONS
+======================= */
 
-/* Button */
 button {
-    margin-top: 15px;
-    padding: 10px;
-    width: 100%;
-    background: #4CAF50;
-    color: white;
+    padding: 10px 15px;
+    margin: 5px;
     border: none;
     border-radius: 8px;
+    background: #4CAF50;
+    color: white;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 14px;
 }
 
 button:hover {
     background: #45a049;
 }
 
-/* Input */
-input[type="file"] {
-    margin-top: 10px;
+/* =======================
+   CARD (QUIZ OUTPUT)
+======================= */
+
+.card {
+    background: white;
+    width: 100%;
+    max-width: 700px;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    box-sizing: border-box;
 }
 
-/* Output text */
-.output {
-    text-align: left;
+/* quiz text formatting */
+.card pre {
     white-space: pre-wrap;
-    line-height: 1.6;
     font-size: 15px;
-
-    background: #f9f9f9;
-    padding: 15px;
-    border-radius: 10px;
-
-    overflow: visible;
-    height: auto;
-
-    word-break: break-word;
-    overflow-wrap: anywhere;
+    line-height: 1.6;
 }
 
-/* Flashcards layout */
+/* =======================
+   FLASHCARDS CONTAINER
+======================= */
+
 .flashcards {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    width: 100%;
+    max-width: 700px;
+    margin-top: 10px;
 }
 
-/* Flashcard box */
+/* =======================
+   INDIVIDUAL FLASHCARD
+======================= */
+
 .flashcard {
     background: white;
-    border-radius: 10px;
-    padding: 15px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-
-    width: 100%;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: transform 0.2s ease;
     box-sizing: border-box;
-    height: auto;
 }
-.flashcard-content {
-    white-space: pre-wrap;
-    word-break: break-word;
-    overflow-wrap: anywhere;
-    line-height: 1.6;
+
+/* hover effect */
+.flashcard:hover {
+    transform: scale(1.02);
+}
+
+/* QUESTION (front) */
+.front {
+    font-weight: bold;
+    color: #222;
+}
+
+/* ANSWER (hidden by default) */
+.back {
+    display: none;
+    margin-top: 10px;
+    color: #444;
+    line-height: 1.5;
+}
+
+/* SHOW ANSWER ON CLICK */
+.flashcard.flipped .back {
+    display: block;
+}
+
+/* =======================
+   LINKS
+======================= */
+
+a {
+    text-decoration: none;
+    margin-top: 15px;
+    color: #4CAF50;
+}
+
+a:hover {
+    text-decoration: underline;
 }

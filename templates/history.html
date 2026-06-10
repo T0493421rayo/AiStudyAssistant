@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quiz History</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="card">
+    <h1>Your Quiz History</h1>
+    {% for q in quizzes %}
+        <div class="flashcard">
+            <p><strong>Score:</strong> {{ q[0] }}/{{ q[1] }}</p>
+            <p><strong>Date:</strong> {{ q[2] }}</p>
+        </div>
+
+    {% endfor %}
+
+    <br>
+
+    <a href="/">
+        <button>Back</button>
+    </a>
+
+</div>
+
+</body>
+</html>

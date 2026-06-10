@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quiz Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="card">
+
+    <h1>Quiz Results</h1>
+
+    <h2>Your Score: {{ score }}/{{ total }}</h2>
+
+    <hr>
+
+    {% for r in results %}
+
+        <div class="flashcard">
+
+            <p><strong>Question {{ r.question }}</strong></p>
+
+            <p><strong>Your answer:</strong> {{ r.user_answer }}</p>
+
+            <p><strong>Correct answer:</strong> {{ r.correct_answer }}</p>
+            <p><strong>Feedback:</strong> {{ r.feedback }}</p>
+
+            {% if r.is_correct %}
+                <p style="color:green;"><strong>Correct</strong></p>
+            {% else %}
+                <p style="color:red;"><strong> Incorrect</strong></p>
+            {% endif %}
+
+        </div>
+
+    {% endfor %}
+
+    <br>
+
+    <a href="/">
+        <button>Try Another Quiz</button>
+    </a>
+
+</div>
+
+</body>
+</html>
