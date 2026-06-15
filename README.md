@@ -1,185 +1,215 @@
-🧠 Overview
-The AI Study Assistant is a Flask-based web application that transforms uploaded PDF notes into interactive learning materials using Google Gemini AI. It generates quizzes and flashcards, evaluates user answers, and tracks performance over time using a database.
-The system is designed to simulate a smart revision tool similar to EdTech platforms like Quizlet or Duolingo, with AI-powered grading and feedback.
-________________________________________
-🎯 Key Features
-1. 📄 PDF Upload & Text Extraction
-•	Users upload a PDF file
-•	The system extracts raw text using PyPDF
-•	Extracted content is used as input for AI generation
-Tech used:
-•	PyPDF (PdfReader)
-•	Flask file handling
-________________________________________
-2. 🤖 AI Quiz Generation (Gemini API)
-The app uses Google Gemini (gemini-2.5-flash) to:
-•	Generate 10 quiz questions
-•	Generate 10 flashcards
-•	Ensure structured output using prompt engineering
-Prompt strategy:
-•	Strict formatting rules
-•	No explanation or extra text
-•	Output structured as JSON or numbered questions
-________________________________________
-3. 🧠 Flashcard System
-•	Flashcards are generated in JSON format:
-[
-  {"q": "Question", "a": "Answer"}
-]
-UI behavior:
-•	Front shows question
-•	Back reveals answer on click (flip interaction)
-________________________________________
-4. 📝 Quiz System
-•	Users answer AI-generated questions
-•	Each question is displayed dynamically in HTML
-•	Hidden fields store:
-o	correct answer
-o	question text
-________________________________________
-5. 📊 Quiz Scoring System (Initial Version)
-Originally implemented using:
-if user_answer.lower() == correct_answer.lower():
-    score += 1
-Then improved to:
-•	Flexible string matching
-•	Partial correctness handling
-________________________________________
-6. 🤖 AI Grading System (Gemini Upgrade)
-Upgraded system uses Gemini as an examiner model.
-Workflow:
-1.	Collect all questions + answers
-2.	Send to Gemini in a single request
-3.	Gemini returns structured grading:
-[
-  {
-    "correct": true,
-    "feedback": "Good understanding of concept"
-  }
-]
-Benefits:
-•	Accepts paraphrasing
-•	Handles scientific equivalence
-•	Provides feedback per question
-•	Mimics human marking
-________________________________________
-7. 📈 Score Calculation & Feedback
-The system:
-•	Computes final score
-•	Displays per-question breakdown
-•	Shows:
-o	user answer
-o	correct answer
-o	AI feedback
-o	correctness indicator
-________________________________________
-8. 🗄️ Database Integration (SQLite)
-Database: study.db
-Stores quiz history:
-CREATE TABLE quizzes (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    score INTEGER,
-    total INTEGER,
-    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-Features:
-•	Stores quiz attempts
-•	Tracks performance over time
-•	Enables history page
-________________________________________
-9. 📊 Progress History Page
-•	Displays past quiz attempts
-•	Shows score + timestamp
-•	Acts as simple analytics system
-________________________________________
-10. ⬇️ Export Features
-Users can download results as:
-TXT
-•	Plain text version of quiz results
-PDF
-•	Generated using ReportLab
-•	Converts quiz output into downloadable document
-________________________________________
-11. ⚠️ Error Handling & Reliability Improvements
-Issues handled:
-•	Gemini busy / API failure (retry logic)
-•	JSON parsing errors from AI output
-•	PDF extraction failures
-Improvements:
-•	Retry loop for API calls
-•	Regex cleanup of AI output
-•	Fallback error messages
-________________________________________
-12. 🧱 Architecture Overview
+# 📚 AI Study Assistant
+
+An AI-powered learning platform that converts PDF notes into quizzes and flashcards using Google Gemini AI, grades student answers intelligently, and tracks learning progress over time.
+
+---
+
+## 🚀 Features
+
+### 📄 PDF Upload & Text Extraction
+
+* Upload study notes in PDF format
+* Extract text automatically using PyPDF
+
+### 🧠 AI Quiz Generation
+
+* Generate quizzes directly from uploaded notes
+* Creates structured questions using Google Gemini
+
+### 🎴 AI Flashcards
+
+* Automatically generate flashcards from notes
+* Interactive flip-card interface
+
+### 🤖 AI-Powered Grading
+
+* Uses Gemini to evaluate answers semantically
+* Accepts paraphrased answers
+* Provides personalized feedback
+
+### 📊 Dashboard & Analytics
+
+* Total quizzes taken
+* Average score
+* Best score
+* Latest score
+
+### 📜 Quiz History
+
+* Stores previous quiz attempts using SQLite
+* Tracks learning progress over time
+
+### ⬇️ Export Options
+
+* Download results as TXT
+* Download results as PDF
+
+---
+
+## 🏗️ System Architecture
+
+```text
 PDF Upload
-   ↓
+     ↓
 Text Extraction (PyPDF)
-   ↓
-Gemini Prompt (Quiz/Flashcards)
-   ↓
-Frontend Display (Flask + HTML)
-   ↓
-User Answers Input
-   ↓
-Gemini Grading (AI evaluation)
-   ↓
-Score + Feedback Display
-   ↓
-SQLite Storage (History)
-________________________________________
-🧰 Tech Stack
-Backend:
-•	Python
-•	Flask
-•	SQLite
-AI:
-•	Google Gemini API
-PDF Processing:
-•	PyPDF
-Export:
-•	ReportLab
-Frontend:
-•	HTML
-•	Jinja2 templates
-•	Basic CSS (custom styling)
-________________________________________
-🚀 Key Design Decisions
-1. AI vs Traditional Grading
-•	Initially used string matching
-•	Upgraded to AI-based evaluation for semantic understanding
-________________________________________
-2. Single API call grading
-•	All answers sent in one request
-•	Reduces cost and latency
-________________________________________
-3. Hidden fields in HTML
-•	Used to pass correct answers securely to backend
-________________________________________
-4. SQLite over cloud DB
-•	Lightweight
-•	Easy local development
-•	Perfect for early-stage portfolio
-________________________________________
-⚠️ Known Limitations
-•	Gemini output occasionally requires JSON cleanup
-•	No user authentication yet
-•	No real-time concurrency handling
-•	Basic UI (no frontend framework)
-•	No persistent cloud deployment yet
-________________________________________
-🔮 Future Improvements
-Short-term
-•	Dashboard with analytics
-•	Wrong answer review system
-•	Better UI styling
-Medium-term
-•	User accounts (login system)
-•	Topic-based quizzes
-•	Progress tracking charts
-Advanced
-•	Adaptive learning system
-•	Personalized revision plans
-•	Multi-document knowledge base
-________________________________________
+     ↓
+Gemini AI Generation
+     ↓
+Quiz / Flashcards
+     ↓
+Student Answers
+     ↓
+Gemini AI Grading
+     ↓
+Score + Feedback
+     ↓
+SQLite Database
+     ↓
+Dashboard & History
+```
+
+---
+
+## 🛠️ Tech Stack
+
+### Backend
+
+* Python
+* Flask
+* SQLite
+
+### AI
+
+* Google Gemini API (`gemini-2.5-flash`)
+
+### PDF Processing
+
+* PyPDF
+
+### PDF Export
+
+* ReportLab
+
+### Frontend
+
+* HTML
+* CSS
+* Jinja2 Templates
+
+---
+
+## 📦 Installation
+
+### Clone the repository
+
+```bash
+git clone <repository-url>
+cd ai-study-assistant
+```
+
+### Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### Create a `.env` file
+
+```env
+GEMINI_API_KEY=your_api_key_here
+```
+
+### Run the application
+
+```bash
+python app.py
+```
+
+Open:
+
+```text
+http://127.0.0.1:5000
+```
+
+---
+
+## 📁 Project Structure
+
+```text
+ai-study-assistant/
+│
+├── app.py
+├── study.db
+├── requirements.txt
+├── .env
+│
+├── templates/
+│   ├── index.html
+│   ├── results.html
+│   ├── score.html
+│   ├── history.html
+│   └── dashboard.html
+│
+├── static/
+│   └── style.css
+│
+└── README.md
+```
+
+---
+
+## 🧩 Challenges Solved
+
+### AI JSON Reliability
+
+Large language models do not always return perfectly formatted JSON. The project uses:
+
+* strict prompting
+* JSON validation
+* error handling
+* retry logic
+
+### Semantic Answer Grading
+
+Traditional exact string matching was replaced with AI grading to allow:
+
+* paraphrasing
+* equivalent scientific explanations
+* minor wording differences
+
+---
+
+## 🎯 Future Improvements
+
+* Weak-topic analysis
+* Practice mistakes mode
+* Score trend graphs
+* User accounts
+* Cloud deployment
+* Adaptive learning recommendations
+
+---
+
+## 💡 Motivation
+
+Many students spend significant time converting notes into revision materials manually. This project automates the process using generative AI and provides intelligent feedback to improve learning efficiency.
+
+---
+
+## 📸 Screenshots
+
+Add screenshots of:
+
+* Home page
+* Quiz generation
+* Flashcards
+* Dashboard
+* Score page
+
+---
+
+## 📄 License
+
+This project is for educational and portfolio purposes.
 
 
