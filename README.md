@@ -1,3 +1,5 @@
+<img width="734" height="500" alt="Screenshot 2026-06-17 205134" src="https://github.com/user-attachments/assets/e676d84d-47b0-409a-b89c-07153b6dd677" />
+<img width="734" height="500" alt="Screenshot 2026-06-17 205134" src="https://github.com/user-attachments/assets/c2bdbf0e-adc2-496f-b362-b7c72fbfe2eb" />
 # 📚 AI Study Assistant
 
 An AI-powered learning platform that converts PDF notes into quizzes and flashcards using Google Gemini AI, grades student answers intelligently, and tracks learning progress over time.
