@@ -204,8 +204,9 @@ Many students spend significant time converting notes into revision materials ma
 ---
 
 ## 📸 Screenshots
-
+<img width="624" height="446" alt="Screenshot 2026-07-02 135051" src="https://github.com/user-attachments/assets/d5cdd1a8-056a-42df-8be7-ae93b3140f3e" />
 <img width="712" height="451" alt="Screenshot 2026-07-02 135028" src="https://github.com/user-attachments/assets/66f43544-d013-4f64-aacc-f8462d3a6474" />
+
 <img width="734" height="500" alt="Screenshot 2026-06-17 205134" src="https://github.com/user-attachments/assets/c2bdbf0e-adc2-496f-b362-b7c72fbfe2eb" />
 <img width="676" height="494" alt="Screenshot 2026-06-17 213948" src="https://github.com/user-attachments/assets/3ad3f837-3b10-4646-bebe-e49b83e7cc92" />
 <img width="678" height="498" alt="Screenshot 2026-06-17 214042" src="https://github.com/user-attachments/assets/814b5b7f-774c-43a8-bcee-e7d4b9cc14f2" />
@@ -213,7 +214,7 @@ Many students spend significant time converting notes into revision materials ma
 <img width="869" height="490" alt="Screenshot 2026-06-17 214123" src="https://github.com/user-attachments/assets/26db35c5-a2cf-4c9b-9220-6744442fe445" />
 <img width="765" height="481" alt="Screenshot 2026-06-17 214155" src="https://github.com/user-attachments/assets/e2f9de67-56de-473c-9935-633f60ac0f10" />
 <img width="851" height="494" alt="Screenshot 2026-06-17 214139" src="https://github.com/user-attachments/assets/43407858-ecdf-4e85-8d2c-0ec5ff89130a" />
-<img width="624" height="446" alt="Screenshot 2026-07-02 135051" src="https://github.com/user-attachments/assets/d5cdd1a8-056a-42df-8be7-ae93b3140f3e" />
+
 
 
 
