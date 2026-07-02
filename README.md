@@ -11,47 +11,64 @@ An AI-powered learning platform that converts PDF notes into quizzes and flashca
 
 ---
 
-## 🚀 Features
+# 🚀 Features
 
 ### 📄 PDF Upload & Text Extraction
 
 * Upload study notes in PDF format
-* Extract text automatically using PyPDF
+* Automatically extracts text using PyPDF
 
 ### 🧠 AI Quiz Generation
 
-* Generate quizzes directly from uploaded notes
-* Creates structured questions using Google Gemini
+* Generates quizzes directly from uploaded notes
+* Questions are created using Google Gemini AI
 
 ### 🎴 AI Flashcards
 
-* Automatically generate flashcards from notes
+* Automatically generates revision flashcards
 * Interactive flip-card interface
+* Responsive card layout
 
 ### 🤖 AI-Powered Grading
 
-* Uses Gemini to evaluate answers semantically
-* Accepts paraphrased answers
-* Provides personalized feedback
+* Grades answers semantically using Google Gemini
+* Accepts:
+
+  * Paraphrased answers
+  * Equivalent scientific explanations
+  * Minor spelling mistakes
+* Provides personalized feedback for every response
 
 ### 📊 Dashboard & Analytics
 
-* Total quizzes taken
+* Total quizzes completed
 * Average score
 * Best score
 * Latest score
 
+### 🎯 Weak Topic Analysis
+
+* Tracks quiz performance by topic
+* Identifies weak and strong subject areas
+* Helps students focus revision on weaker concepts
+
 ### 📜 Quiz History
 
-* Stores previous quiz attempts using SQLite
-* Tracks learning progress over time
+* Stores previous quiz attempts
+* Tracks learning progress over time using SQLite
+
+### 🔐 User Authentication
+
+* User registration
+* Secure login
+* Password hashing with Werkzeug
+* Session management
+* Logout functionality
 
 ### ⬇️ Export Options
 
-* Download results as TXT
-* Download results as PDF
-
----
+* Export results as TXT
+* Export results as PDF
 
 ## 🏗️ System Architecture
 
@@ -150,8 +167,10 @@ ai-study-assistant/
 ├── requirements.txt
 ├── .env
 │
-├── templates/
+templates/
 │   ├── index.html
+│   ├── register.html
+│   ├── login.html
 │   ├── results.html
 │   ├── score.html
 │   ├── history.html
@@ -191,7 +210,6 @@ Traditional exact string matching was replaced with AI grading to allow:
 * Weak-topic analysis
 * Practice mistakes mode
 * Score trend graphs
-* User accounts
 * Cloud deployment
 * Adaptive learning recommendations
 
