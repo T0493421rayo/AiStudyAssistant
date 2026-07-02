@@ -220,6 +220,20 @@ Traditional exact string matching was replaced with AI grading to allow:
 Many students spend significant time converting notes into revision materials manually. This project automates the process using generative AI and provides intelligent feedback to improve learning efficiency.
 
 ---
+## 💻 Key Skills Demonstrated
+
+* Full-stack web development with Flask
+* RESTful routing
+* Authentication & session management
+* SQLite database design
+* AI integration using Google Gemini
+* Prompt engineering
+* PDF processing
+* Semantic answer evaluation
+* Data persistence
+* Responsive UI design
+* Error handling and JSON validation
+
 
 ## 📸 Screenshots
 <img width="624" height="446" alt="Screenshot 2026-07-02 135051" src="https://github.com/user-attachments/assets/d5cdd1a8-056a-42df-8be7-ae93b3140f3e" />
