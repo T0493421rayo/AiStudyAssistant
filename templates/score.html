@@ -1,12 +1,16 @@
+```html
 <!DOCTYPE html>
 <html>
 <head>
     <title>Quiz Results</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
 
-<div class="card">
+<div class="results-container">
 
     <h1>Quiz Results</h1>
 
@@ -16,32 +20,61 @@
 
     {% for r in results %}
 
-        <div class="flashcard">
+    <div class="result-card">
 
-            <p><strong>Question {{ r.question }}</strong></p>
+        <h3>Question {{ r.question }}</h3>
 
-            <p><strong>Your answer:</strong> {{ r.user_answer }}</p>
+        <p>
+            <strong>Your answer:</strong>
+            {{ r.user_answer }}
+        </p>
 
-            <p><strong>Correct answer:</strong> {{ r.correct_answer }}</p>
-            <p><strong>Feedback:</strong> {{ r.feedback }}</p>
+        <p>
+            <strong>Correct answer:</strong>
+            {{ r.correct_answer }}
+        </p>
 
-            {% if r.is_correct %}
-                <p style="color:green;"><strong>Correct</strong></p>
-            {% else %}
-                <p style="color:red;"><strong> Incorrect</strong></p>
-            {% endif %}
-
+        <div class="feedback">
+            <strong>Feedback:</strong>
+            {{ r.feedback }}
         </div>
+
+        {% if r.is_correct %}
+
+            <p class="correct">
+                ✓ Correct
+            </p>
+
+        {% else %}
+
+            <p class="incorrect">
+                ✗ Incorrect
+            </p>
+
+        {% endif %}
+
+    </div>
 
     {% endfor %}
 
-    <br>
+    <div class="result-actions">
 
-    <a href="/">
-        <button>Try Another Quiz</button>
-    </a>
+        <a href="/">
+            <button>Try Another Quiz</button>
+        </a>
+
+        <a href="/dashboard">
+            <button>View Dashboard</button>
+        </a>
+
+        <a href="/history">
+            <button>View My Progress</button>
+        </a>
+
+    </div>
 
 </div>
 
 </body>
 </html>
+```

@@ -20,43 +20,54 @@
         </a>
     </div>
 
-    #Quiz mode
+    
 
 {% if quiz %}
 
 <form action="/score" method="POST">
 
-{% for q in quiz %}
+<div class="quiz-container">
 
-<div class="flashcard">
+    {% for q in quiz %}
 
-    <p>
-        <strong>Question {{ loop.index }}</strong>
-    </p>
+    <div class="quiz-card">
 
-    <p>{{ q.question }}</p>
+        <p>
+            <strong>Question {{ loop.index }}</strong>
+        </p>
 
-    <input
-        type="text"
-        name="answer{{ loop.index }}"
-        placeholder="Type your answer"
-        required
-    >
-    <input
-        type="hidden"
-        name="question{{ loop.index }}"
-        value="{{ q.question }}"
-    >
-    <input
-        type="hidden"
-        name="correct{{ loop.index }}"
-        value="{{ q.answer }}"
-    >
+        <p>{{ q.question }}</p>
+
+        <input
+            type="text"
+            name="answer{{ loop.index }}"
+            placeholder="Type your answer"
+            required
+        >
+
+        <input
+            type="hidden"
+            name="question{{ loop.index }}"
+            value="{{ q.question }}"
+        >
+
+        <input
+            type="hidden"
+            name="correct{{ loop.index }}"
+            value="{{ q.answer }}"
+        >
+
+        <input
+            type="hidden"
+            name="topic{{ loop.index }}"
+            value="{{ q.topic }}"
+        >
+
+    </div>
+
+    {% endfor %}
 
 </div>
-
-{% endfor %}
-
 <br>
 
 <button type="submit">
@@ -70,7 +81,7 @@
     <!-- ================= FLASHCARDS MODE ================= -->
     {% if flashcards %}
 
-    <h2>🧠 Flashcards</h2>
+    <h2> Flashcards</h2>
 
     <div class="flashcards">
 
@@ -78,15 +89,21 @@
 
         <div class="flashcard" onclick="this.classList.toggle('flipped')">
 
-            <div class="front">
-                {{ card.q }}
-            </div>
+    <div class="flashcard-inner">
 
-            <div class="back">
-                {{ card.a }}
-            </div>
-
+        <div class="flashcard-front">
+            <h3> Question</h3>
+            <p>{{ card.q }}</p>
         </div>
+
+        <div class="flashcard-back">
+            <h3>Answer</h3>
+            <p>{{ card.a }}</p>
+        </div>
+
+    </div>
+
+    </div>
 
         {% endfor %}
 

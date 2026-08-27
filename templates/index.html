@@ -1,45 +1,109 @@
 <!DOCTYPE html>
-<html>
+
+<html lang="en">
+
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Study Assistant</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+
+
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}">
+
+
 </head>
 
 <body>
 
 <div class="container">
-    <h1>AI Study Assistant</h1>
+
+
+<h1> AI Study Assistant</h1>
+    <p class="subtitle">
+        Upload notes and generate quizzes, flashcards, and AI feedback instantly.
+    </p>
+
+
+
+
+<form action="/upload"
+      method="POST"
+      enctype="multipart/form-data">
+
     <div class="card">
-        <p>Upload your PDF notes to generate quiz questions or flashcards instantly.</p>
-        <form action="/upload" method="POST" enctype="multipart/form-data" onsubmit="showLoading()">
 
-            <input type="file" name="pdf" required>
+        <h2>Start Learning</h2>
 
-            <button type="submit" name="action" value="quiz">
+        <input type="file"
+               name="pdf"
+               required>
+
+        <div class="primary-actions">
+
+            <button class="green"
+                    type="submit"
+                    name="action"
+                    value="quiz">
+
                 Generate Quiz
+
             </button>
 
-            <button type="submit" name="action" value="flashcards">
+            <button class="green"
+                    type="submit"
+                    name="action"
+                    value="flashcards">
+
                 Generate Flashcards
-            </button>
-            <a href="/history">
-            <button type="button">
-                View My Progress
-            </button>
-            </a>
 
-        </form>
-        <div id="loading" style="display:none;">
-            <p>Generating study materials...</p>
+            </button>
+
+
+
         </div>
 
     </div>
 
+</form>
+
+
+<div class="card">
+
+    <h2> Your Progress</h2>
+
+    <a class="btn" href="/history">
+        View My Progress
+    </a>
+
+    <a class="btn" href="/dashboard">
+        View Dashboard
+    </a>
+
+    <a href="/logout">
+        <button type="button">Logout</button>
+    </a>
+
 </div>
+
+<div id="loading" style="display:none;">
+    <p>Generating study materials...</p>
+</div>
+
+
+</div>
+
 <script>
-function showLoading() {
-    document.getElementById("loading").style.display = "block";
-}
+
+document.querySelector("form").addEventListener(
+    "submit",
+    function() {
+        document.getElementById("loading").style.display = "block";
+    }
+);
+
 </script>
+
 </body>
 </html>

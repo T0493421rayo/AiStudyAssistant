@@ -3,7 +3,7 @@ import time
 import json
 import re
 
-from flask import Flask, render_template, request, Response, send_file
+from flask import Flask, render_template, request, Response, send_file, redirect,session,url_for
 from pypdf import PdfReader
 from google import genai
 from dotenv import load_dotenv
@@ -11,10 +11,21 @@ from reportlab.pdfgen import canvas
 from io import BytesIO
 import sqlite3
 from database import init_db
+from werkzeug.security import ( generate_password_hash, check_password_hash )
+
+
+
+
 # #
 
 app = Flask(__name__)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATABASE = os.path.join(BASE_DIR, "study.db")
+app.secret_key = "studyassistant1"
+
+
 init_db()
+print("DATABASE:", DATABASE)
 load_dotenv()
 
 client = genai.Client(
@@ -45,6 +56,10 @@ def extract_text(file):
 
 @app.route("/")
 def home():
+
+    if "user_id" not in session:
+        return redirect("/login")
+
     return render_template("index.html")
 
 
@@ -95,6 +110,7 @@ Notes:
           {{
             "question": "Question text",
             "answer": "Correct answer"
+            "topic": "Topic name"
           }}
         ]
         Generate EXACTLY 10 quiz questions.
@@ -102,7 +118,7 @@ Notes:
         {text}
         """
 
-    # ---------------- GEMINI CALL (RETRY) ---------------- #
+
 
     response = None
 
@@ -216,11 +232,22 @@ def download_pdf():
         mimetype="application/pdf"
     )
 
+
 @app.route("/score", methods=["POST"])
 def score():
+
+    # Make sure user is logged in
+    if "user_id" not in session:
+        return redirect("/login")
+
     quiz_data = []
 
+    # =========================
+    # COLLECT QUIZ DATA
+    # =========================
+
     for i in range(1, 11):
+
         question = request.form.get(
             f"question{i}",
             ""
@@ -236,40 +263,51 @@ def score():
             ""
         )
 
+        topic = request.form.get(
+            f"topic{i}",
+            "Unknown"
+        )
+
         quiz_data.append({
             "question": question,
             "student_answer": user_answer,
-            "correct_answer": correct_answer
+            "correct_answer": correct_answer,
+            "topic": topic
         })
 
+    # =========================
+    # AI GRADING
+    # =========================
+
     grading_prompt = f"""
-    You are an examiner.
-    Grade each answer fairly.
+You are an examiner.
 
-    Accept:
-    - equivalent wording
-    - paraphrasing
-    - minor spelling mistakes
-    - scientifically correct explanations
+Grade each answer fairly.
 
-    Reject:
-    - incorrect concepts
+Accept:
+- equivalent wording
+- paraphrasing
+- minor spelling mistakes
+- scientifically correct explanations
 
-    Return ONLY valid JSON.
+Reject:
+- incorrect concepts
 
-    Format:
+Return ONLY valid JSON.
 
-    [
-      {{
-        "correct": true,
-        "feedback": "short feedback"
-      }}
-    ]
+Format:
 
-    Quiz:
+[
+  {{
+    "correct": true,
+    "feedback": "short feedback"
+  }}
+]
 
-    {json.dumps(quiz_data)}
-    """
+Quiz:
+
+{json.dumps(quiz_data)}
+"""
 
     response = client.models.generate_content(
         model="gemini-2.5-flash",
@@ -277,40 +315,103 @@ def score():
     )
 
     cleaned = response.text.strip()
-    cleaned = cleaned.replace("```json", "")
-    cleaned = cleaned.replace("```", "")
+
+    cleaned = cleaned.replace(
+        "```json",
+        ""
+    )
+
+    cleaned = cleaned.replace(
+        "```",
+        ""
+    )
 
     try:
+
         grading = json.loads(cleaned)
+
     except Exception:
-        grading = [{"correct": False, "feedback": "Grading error"} for _ in quiz_data]
+
+        grading = [
+            {
+                "correct": False,
+                "feedback": "Grading error"
+            }
+            for _ in quiz_data
+        ]
+
+    # =========================
+    # CALCULATE SCORE
+    # =========================
 
     results = []
     score = 0
     total = len(grading)
+
+    conn = sqlite3.connect(DATABASE)
+    c = conn.cursor()
 
     for i, item in enumerate(grading):
 
         if item["correct"]:
             score += 1
 
+        # =========================
+        # SAVE TOPIC PERFORMANCE
+        # =========================
+
+        c.execute("""
+            INSERT INTO topic_results
+            (user_id, topic, correct)
+            VALUES (?, ?, ?)
+        """, (
+            session["user_id"],
+            quiz_data[i]["topic"],
+            int(item["correct"])
+        ))
+
+        # =========================
+        # BUILD RESULTS
+        # =========================
+
         results.append({
+
             "question": i + 1,
-            "user_answer": quiz_data[i]["student_answer"],
-            "correct_answer": quiz_data[i]["correct_answer"],
-            "is_correct": item["correct"],
-            "feedback": item["feedback"]
+
+            "user_answer":
+                quiz_data[i]["student_answer"],
+
+            "correct_answer":
+                quiz_data[i]["correct_answer"],
+
+            "is_correct":
+                item["correct"],
+
+            "feedback":
+                item["feedback"]
+
         })
-    conn = sqlite3.connect("study.db")
-    c = conn.cursor()
+
+    # =========================
+    # SAVE QUIZ SCORE
+    # =========================
 
     c.execute("""
-        INSERT INTO quizzes (score, total)
-        VALUES (?, ?)
-    """, (score, total))
+        INSERT INTO quizzes
+        (user_id, score, total)
+        VALUES (?, ?, ?)
+    """, (
+        session["user_id"],
+        score,
+        total
+    ))
 
     conn.commit()
     conn.close()
+
+    # =========================
+    # SHOW RESULTS
+    # =========================
 
     return render_template(
         "score.html",
@@ -318,23 +419,246 @@ def score():
         total=total,
         results=results
     )
+
+
+
+
 @app.route("/history")
 def history():
 
-    conn =sqlite3.connect("study.db")
+    if "user_id" not in session:
+        return redirect("/login")
+
+    conn = sqlite3.connect(DATABASE)
     c = conn.cursor()
 
     c.execute("""
         SELECT score, total, timestamp
         FROM quizzes
+        WHERE user_id = ?
         ORDER BY id DESC
-    """)
+    """, (session["user_id"],))
 
     quizzes = c.fetchall()
 
     conn.close()
 
-    return render_template("history.html", quizzes=quizzes)
+    return render_template(
+        "history.html",
+        quizzes=quizzes
+    )
+
+
+@app.route("/dashboard")
+def dashboard():
+
+    # Make sure the user is logged in
+    if "user_id" not in session:
+        return redirect("/login")
+
+    conn = sqlite3.connect(DATABASE)
+    c = conn.cursor()
+
+    # =========================
+    # TOPIC PERFORMANCE
+    # =========================
+
+    c.execute("""
+        SELECT
+            topic,
+            AVG(correct)
+        FROM topic_results
+        WHERE user_id = ?
+        GROUP BY topic
+        ORDER BY AVG(correct) ASC
+    """, (session["user_id"],))
+
+    topic_data = c.fetchall()
+
+    weak_topics = []
+    strong_topics = []
+
+    for topic, accuracy in topic_data:
+
+        percentage = round(accuracy * 100)
+
+        if accuracy < 0.7:
+
+            weak_topics.append({
+                "topic": topic,
+                "accuracy": percentage
+            })
+
+        else:
+
+            strong_topics.append({
+                "topic": topic,
+                "accuracy": percentage
+            })
+
+    # =========================
+    # QUIZ SCORES
+    # =========================
+
+    c.execute("""
+        SELECT score, total
+        FROM quizzes
+        WHERE user_id = ?
+        ORDER BY id ASC
+    """, (session["user_id"],))
+
+    rows = c.fetchall()
+
+    # =========================
+    # CHART DATA
+    # =========================
+
+    chart_data = []
+
+    for i, (score, total) in enumerate(rows, start=1):
+
+        chart_data.append({
+            "quiz": f"Quiz {i}",
+            "score": score
+        })
+
+    # =========================
+    # NO QUIZZES YET
+    # =========================
+
+    if not rows:
+
+        conn.close()
+
+        return render_template(
+            "dashboard.html",
+            total_quizzes=0,
+            average_score=0,
+            best_score=0,
+            latest_score=0,
+            chart_data=[],
+            weak_topics=weak_topics,
+            strong_topics=strong_topics
+        )
+
+    # =========================
+    # STATISTICS
+    # =========================
+
+    total_quizzes = len(rows)
+
+    average_score = round(
+        sum(score for score, total in rows)
+        / total_quizzes,
+        1
+    )
+
+    best_score = max(
+        score for score, total in rows
+    )
+
+    latest_score = rows[-1][0]
+
+    conn.close()
+
+    # =========================
+    # DASHBOARD
+    # =========================
+
+    return render_template(
+        "dashboard.html",
+        total_quizzes=total_quizzes,
+        average_score=average_score,
+        best_score=best_score,
+        latest_score=latest_score,
+        chart_data=chart_data,
+        weak_topics=weak_topics,
+        strong_topics=strong_topics
+    )
+
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+
+    if request.method == "POST":
+
+        username = request.form["username"]
+
+        password = generate_password_hash(
+            request.form["password"]
+        )
+
+        conn = sqlite3.connect(DATABASE)
+        c = conn.cursor()
+
+        try:
+
+            c.execute(
+                """
+                INSERT INTO users
+                (username, password)
+                VALUES (?, ?)
+                """,
+                (username, password)
+            )
+
+            conn.commit()
+
+        except sqlite3.IntegrityError:
+
+            conn.close()
+
+            return "Username already exists."
+
+        conn.close()
+
+        return redirect("/login")
+
+    return render_template("register.html")
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+
+    if request.method == "POST":
+
+        username = request.form["username"]
+        password = request.form["password"]
+
+        conn =  sqlite3.connect(DATABASE)
+        c = conn.cursor()
+
+        c.execute("""
+            SELECT id, password
+            FROM users
+            WHERE username = ?
+        """, (username,))
+
+        user = c.fetchone()
+
+        conn.close()
+
+        if user and check_password_hash(user[1], password):
+
+            session["user_id"] = user[0]
+
+            return redirect("/")
+
+        return "Invalid username or password."
+
+    return render_template("login.html")
+
+
+@app.route("/logout")
+def logout():
+
+    session.clear()
+
+    return redirect("/login")
+
+
+
 
 
 
