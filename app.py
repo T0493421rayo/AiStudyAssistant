@@ -3,7 +3,7 @@ import time
 import json
 import re
 
-from flask import Flask, render_template, request, Response, send_file, redirect,session,url_for
+from flask import Flask, render_template, request, Response, send_file, redirect, session
 from pypdf import PdfReader
 from google import genai
 from dotenv import load_dotenv
@@ -16,23 +16,22 @@ from werkzeug.security import ( generate_password_hash, check_password_hash )
 
 
 
-# #
 
+load_dotenv()
 app = Flask(__name__)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATABASE = os.path.join(BASE_DIR, "study.db")
-app.secret_key = "studyassistant1"
+app.secret_key = os.getenv("FLASK_SECRET_KEY")
 
 
 init_db()
-print("DATABASE:", DATABASE)
-load_dotenv()
+
 
 client = genai.Client(
     api_key=os.getenv("GEMINI_API_KEY")
 )
 
-latest_result = ""
+
 
 
 
@@ -67,18 +66,41 @@ def home():
 
 @app.route("/upload", methods=["POST"])
 def upload():
-    global latest_result
 
     file = request.files["pdf"]
     action = request.form.get("action")
 
+    # Check that a file was actually selected
+    if not file or not file.filename:
+        return render_template(
+            "results.html",
+            questions="Please upload a PDF file."
+        )
+
+    # Check file extension
+    if not file.filename.lower().endswith(".pdf"):
+        return render_template(
+            "results.html",
+            questions="Your document has to be a PDF."
+        )
+
     text = extract_text(file)
 
+    # Check for invalid/corrupted PDF
     if text is None:
         return render_template(
             "results.html",
             questions="Invalid or corrupted PDF. Please upload a valid PDF file."
         )
+
+    # Check for empty/image-only PDF
+    if not text.strip():
+        return render_template(
+            "results.html",
+            questions="No readable text found in this PDF. Please upload a PDF containing text."
+        )
+
+
 
 
     if action == "flashcards":
@@ -149,11 +171,9 @@ Notes:
         try:
             flashcards = json.loads(cleaned)
         except Exception as e:
-            print("JSON ERROR:", e)
-            print("RAW RESPONSE:", response.text)
             flashcards = []
 
-        latest_result = "\n\n".join(
+        session["latest_result"] = "\n\n".join(
             [f"Q: {c['q']}\nA: {c['a']}" for c in flashcards]
         )
 
@@ -169,21 +189,15 @@ Notes:
 
     try:
         quiz = json.loads(cleaned)
+
     except Exception as e:
-        print("QUIZ JSON ERROR:", e)
-        print("RAW RESPONSE:")
-        print(response.text)
         quiz = []
-        print("===== QUIZ RESPONSE =====")
-        print(response.text)
-        print("=========================")
 
-    latest_result = response.text
-
+    session["latest_result"] = response.text
 
     return render_template(
-        "results.html",
-        quiz=quiz
+    "results.html",
+    quiz=quiz
     )
 
 
@@ -191,7 +205,8 @@ Notes:
 
 @app.route("/download/txt")
 def download_txt():
-    global latest_result
+
+    latest_result = session.get("latest_result")
 
     if not latest_result:
         return "No content to download yet."
@@ -205,17 +220,20 @@ def download_txt():
     )
 
 
-
-
 @app.route("/download/pdf")
 def download_pdf():
-    global latest_result
+
+    latest_result = session.get("latest_result")
+
     if not latest_result:
         return "No content to download."
+
     buffer = BytesIO()
     p = canvas.Canvas(buffer)
+
     text_object = p.beginText(40, 800)
     text_object.setFont("Helvetica", 10)
+
     for line in latest_result.split("\n"):
         text_object.textLine(line)
 
@@ -663,4 +681,4 @@ def logout():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
