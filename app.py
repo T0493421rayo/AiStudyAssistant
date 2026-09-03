@@ -62,8 +62,6 @@ def home():
     return render_template("index.html")
 
 
-
-
 @app.route("/upload", methods=["POST"])
 def upload():
 
@@ -100,8 +98,7 @@ def upload():
             questions="No readable text found in this PDF. Please upload a PDF containing text."
         )
 
-
-
+    # ---------------- CREATE PROMPT ---------------- #
 
     if action == "flashcards":
         prompt = f"""
@@ -114,8 +111,8 @@ NO backticks.
 Return EXACTLY this format:
 
 [
-{{"q": "Question here", "a": "Answer here"}},
-{{"q": "Question here", "a": "Answer here"}}
+  {{"q": "Question here", "a": "Answer here"}},
+  {{"q": "Question here", "a": "Answer here"}}
 ]
 
 Generate exactly 10 flashcards.
@@ -125,22 +122,29 @@ Notes:
 """
     else:
         prompt = f"""
-        You are a strict API.
-        Return ONLY valid JSON.
-        Format:
-        [
-          {{
-            "question": "Question text",
-            "answer": "Correct answer"
-            "topic": "Topic name"
-          }}
-        ]
-        Generate EXACTLY 10 quiz questions.
-        Notes:
-        {text}
-        """
+You are a strict API that returns valid JSON ONLY.
 
+NO markdown.
+NO explanation.
+NO backticks.
 
+Return EXACTLY this format:
+
+[
+  {{
+    "question": "Question text",
+    "answer": "Correct answer",
+    "topic": "Topic name"
+  }}
+]
+
+Generate EXACTLY 10 quiz questions.
+
+Notes:
+{text}
+"""
+
+    # ---------------- CALL GEMINI ---------------- #
 
     response = None
 
@@ -151,7 +155,8 @@ Notes:
                 contents=prompt
             )
             break
-        except Exception:
+        except Exception as e:
+            print(f"GEMINI ERROR - ATTEMPT {attempt + 1}:", e)
             time.sleep(2)
 
     if response is None:
@@ -160,21 +165,49 @@ Notes:
             questions="Gemini is currently busy. Please try again in a minute."
         )
 
+    # Make sure Gemini actually returned text
+    if not response.text:
+        print("GEMINI RETURNED NO TEXT")
+
+        return render_template(
+            "results.html",
+            questions="The AI did not return a result. Please try again."
+        )
+
     # ---------------- FLASHCARDS MODE ---------------- #
 
     if action == "flashcards":
 
         cleaned = response.text.strip()
-        cleaned = re.sub(r"```json", "", cleaned)
-        cleaned = re.sub(r"```", "", cleaned)
+
+        # Remove markdown code fences if Gemini adds them
+        cleaned = re.sub(r"^```json\s*", "", cleaned)
+        cleaned = re.sub(r"^```\s*", "", cleaned)
+        cleaned = re.sub(r"\s*```$", "", cleaned)
+        cleaned = cleaned.strip()
 
         try:
             flashcards = json.loads(cleaned)
+
+            if not isinstance(flashcards, list) or not flashcards:
+                raise ValueError(
+                    "Gemini returned an empty or invalid flashcard list."
+                )
+
         except Exception as e:
-            flashcards = []
+            print("FLASHCARD JSON ERROR:", e)
+            print("GEMINI RAW RESPONSE:", response.text)
+
+            return render_template(
+                "results.html",
+                questions="The AI returned an invalid flashcard result. Please try again."
+            )
 
         session["latest_result"] = "\n\n".join(
-            [f"Q: {c['q']}\nA: {c['a']}" for c in flashcards]
+            [
+                f"Q: {c['q']}\nA: {c['a']}"
+                for c in flashcards
+            ]
         )
 
         return render_template(
@@ -182,22 +215,48 @@ Notes:
             flashcards=flashcards
         )
 
+    # ---------------- QUIZ MODE ---------------- #
 
     cleaned = response.text.strip()
-    cleaned = re.sub(r"```json", "", cleaned)
-    cleaned = re.sub(r"```", "", cleaned)
+
+    # Remove markdown code fences if Gemini adds them
+    cleaned = re.sub(r"^```json\s*", "", cleaned)
+    cleaned = re.sub(r"^```\s*", "", cleaned)
+    cleaned = re.sub(r"\s*```$", "", cleaned)
+    cleaned = cleaned.strip()
 
     try:
         quiz = json.loads(cleaned)
 
+        if not isinstance(quiz, list) or not quiz:
+            raise ValueError(
+                "Gemini returned an empty or invalid quiz."
+            )
+
+        # Make sure each question has the fields results.html expects
+        for q in quiz:
+            if not all(
+                key in q
+                for key in ["question", "answer", "topic"]
+            ):
+                raise ValueError(
+                    "A quiz question is missing question, answer, or topic."
+                )
+
     except Exception as e:
-        quiz = []
+        print("QUIZ JSON ERROR:", e)
+        print("GEMINI RAW RESPONSE:", response.text)
+
+        return render_template(
+            "results.html",
+            questions="The AI returned an invalid quiz. Please try again."
+        )
 
     session["latest_result"] = response.text
 
     return render_template(
-    "results.html",
-    quiz=quiz
+        "results.html",
+        quiz=quiz
     )
 
 
